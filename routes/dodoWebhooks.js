@@ -1,12 +1,43 @@
 const express = require('express');
 const router = express.Router();
 const { Transaction, User, Subscription, CoinPackage } = require('../models'); // Corrected path
+const dodoSignature = require('../middleware/dodoSignature');
+const bodyParser = require('body-parser');
 
-// Placeholder for Dodo Payments webhook handler
-router.post('/', async (req, res) => {
-  console.log('Dodo Payments Webhook received:', JSON.stringify(req.body, null, 2));
+/**
+ * POST /webhooks/dodo
+ *
+ * Dodo Webhooks entrypoint (source of truth):
+ * - Verify the webhook signature using the Dodo Webhook Signing Key before processing.
+ * - Consume events such as payment.succeeded, payment.failed, payout.succeeded, etc.
+ * - Use event.data metadata (userId, transactionType, relatedEntityId) to correlate local records.
+ *
+ * Security:
+ * - Capture the raw request body for signature verification (Express json() may need a raw body parser here).
+ * - Reject (4xx) when signature verification fails.
+ *
+ * Idempotency:
+ * - Ensure each external event processes at-most-once (e.g., check existing Transaction status).
+ *
+ * Expected event mapping (example):
+ * - payment.succeeded -> mark Transaction completed; apply side-effects:
+ *   - coin_purchase: credit coins from CoinPackage
+ *   - subscription: activate Subscription and set endDate per plan
+ * - payment.failed/payment.cancelled -> mark pending Transaction failed/cancelled
+ *
+ * Response:
+ * - Always return 2xx on successful processing to stop retries.
+ * - Return 5xx on internal errors to allow retry from Dodo.
+ *
+ * Docs: https://docs.dodopayments.com/developer-resources/introduction
+ */
 
-  const event = req.body;
+// Raw body parser must come before signature verification
+router.post('/', bodyParser.raw({ type: 'application/json' }), dodoSignature, async (req, res) => {
+  const json = JSON.parse(req.body.toString('utf8') || '{}');
+  console.log('Dodo Payments Webhook received:', JSON.stringify(json, null, 2));
+
+  const event = json;
 
   try {
     // Implement actual webhook processing logic here based on Dodo Payments event types

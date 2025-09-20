@@ -1,0 +1,89 @@
+### Health
+GET http://localhost:5000/
+
+### Auth - Register
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "email": "alice@example.com",
+  "password": "pass123",
+  "role": "user"
+}
+
+### Auth - Login
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "pass123"
+}
+
+### Coins - Packages
+GET http://localhost:5000/coins/packages
+
+### Coins - Purchase (auth)
+POST http://localhost:5000/coins/purchase
+Content-Type: application/json
+x-auth-token: {{token}}
+
+{
+  "coinPackageId": 1,
+  "userId": 1
+}
+
+### Payments - Confirm (auth)
+POST http://localhost:5000/payments/confirm
+Content-Type: application/json
+x-auth-token: {{token}}
+
+{
+  "transactionId": 1,
+  "dodoTransactionId": "cs_123",
+  "status": "completed"
+}
+
+### Subscriptions - Create (auth)
+POST http://localhost:5000/subscriptions/create
+Content-Type: application/json
+x-auth-token: {{token}}
+
+{
+  "creatorId": 2,
+  "subscriberId": 1,
+  "planType": "monthly",
+  "price": 199
+}
+
+### Subscriptions - Cancel (auth)
+POST http://localhost:5000/subscriptions/cancel
+Content-Type: application/json
+x-auth-token: {{token}}
+
+{
+  "subscriptionId": 1
+}
+
+### Transactions - List (auth)
+GET http://localhost:5000/transactions/1
+x-auth-token: {{token}}
+
+### Webhook (simulate local) - requires raw body & signature disabled
+POST http://localhost:5000/webhooks/dodo
+Content-Type: application/json
+
+{
+  "type": "payment.succeeded",
+  "data": {
+    "id": "cs_123",
+    "amount": 199,
+    "currency": "INR",
+    "metadata": {
+      "userId": 1,
+      "transactionType": "coin_purchase",
+      "relatedEntityId": 1
+    }
+  }
+}

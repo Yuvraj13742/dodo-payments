@@ -2,6 +2,19 @@ const { Subscription, User, Transaction, sequelize } = require('../models');
 const dodoPaymentService = require('../services/dodoPaymentService');
 const { Sequelize } = require('sequelize');
 
+/**
+ * POST /subscriptions/create
+ *
+ * Initiates a subscription via Dodo Checkout Sessions.
+ * Input (body): { creatorId, subscriberId, planType: 'monthly'|'yearly', price }
+ * Flow:
+ * - Validate creator and subscriber
+ * - Create Dodo Checkout Session (server-side)
+ * - Create local Subscription (pending) and pending Transaction linked to session id
+ * - Return { checkoutUrl, subscriptionId }
+ * Finalization:
+ * - /webhooks/dodo should activate subscription on payment.succeeded and set endDate per plan.
+ */
 exports.createSubscription = async (req, res) => {
   const { creatorId, subscriberId, planType, price } = req.body;
 
@@ -66,6 +79,10 @@ exports.createSubscription = async (req, res) => {
   }
 };
 
+/**
+ * POST /subscriptions/cancel
+ * Cancels a local subscription (immediate). If using Dodo plans, also coordinate with Dodo Subscription APIs.
+ */
 exports.cancelSubscription = async (req, res) => {
   const { subscriptionId } = req.body;
 
@@ -91,6 +108,10 @@ exports.cancelSubscription = async (req, res) => {
   }
 };
 
+/**
+ * GET /subscriptions/:subscriptionId
+ * Returns subscription with creator/subscriber details.
+ */
 exports.getSubscriptionDetails = async (req, res) => {
   const { subscriptionId } = req.params;
 
@@ -114,6 +135,10 @@ exports.getSubscriptionDetails = async (req, res) => {
   }
 };
 
+/**
+ * PUT /subscriptions/update
+ * Updates subscription properties (planType, price, autoRenew).
+ */
 exports.updateSubscription = async (req, res) => {
   const { subscriptionId, planType, price, autoRenew } = req.body;
 
@@ -137,6 +162,10 @@ exports.updateSubscription = async (req, res) => {
   }
 };
 
+/**
+ * GET /subscriptions/plans
+ * Lists all subscription plans with creator info.
+ */
 exports.getAllSubscriptionPlans = async (req, res) => {
   try {
     const subscriptionPlans = await Subscription.findAll({

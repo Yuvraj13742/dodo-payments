@@ -10,6 +10,15 @@ const authRoutes = require('../routes/authRoutes');
 const transactionRoutes = require('../routes/transactionRoutes');
 const paymentRoutes = require('../routes/paymentRoutes');
 
+/**
+ * App wiring
+ * - Dodo integrations:
+ *   - Hosted Checkout: /coins/purchase, /subscriptions/create (server-side session creation)
+ *   - Webhooks: /webhooks/dodo (finalize payments/subscriptions, verify signature)
+ *   - Payouts: /creators/withdraw (simulate; replace with real Dodo payouts)
+ * - Auth: JWT via x-auth-token; SKIP_AUTH=true bypasses for dev
+ */
+
 dotenv.config();
 
 const app = express();

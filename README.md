@@ -58,7 +58,7 @@ POST /coins/purchase (auth)
   - 404: { message: 'Coin package not found.' | 'User not found.' }
   - 500: { message, error }
 - Dodo notes:
-  - Server should call Create Checkout Session with `Authorization: Bearer <key>` to Test or Live base URL and return the hosted `checkoutUrl` to the client; client redirects to complete payment. See [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - Server should call Create Checkout Session with `Authorization: Bearer <key>` to Test or Live base URL and return the hosted `checkoutUrl` to the client; client redirects to complete payment. See [docs](https://docs.dodopayments.com/developer-resources/introduction).
   - Treat client return as provisional; finalize state via webhooks. Respect rate limits (100/min; 10/sec burst) and monitor `X-RateLimit-Remaining`.
 
 GET /coins/balance/:userId (auth)
@@ -107,7 +107,7 @@ POST /subscriptions/create (auth)
   - 404: { message: 'Creator not found or is not a creator.' | 'Subscriber not found.' }
   - 500: { message, error }
 - Dodo notes:
-  - Use Checkout Sessions for subscription signups; pass plan details and customer info from your server. See [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - Use Checkout Sessions for subscription signups; pass plan details and customer info from your server. See [docs](https://docs.dodopayments.com/developer-resources/introduction).
   - Subscription lifecycle (activate, invoice, renew, cancel) should be tracked via webhooks; client redirects are not the source of truth.
 
 POST /subscriptions/cancel (auth)
@@ -119,7 +119,7 @@ POST /subscriptions/cancel (auth)
   - 404: { message: 'Subscription not found.' }
   - 500: { message, error }
 - Dodo notes:
-  - If using Dodo Subscription APIs (Change Plan, Update, Charge), coordinate status with webhook events to avoid drift. See API groups in [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - If using Dodo Subscription APIs (Change Plan, Update, Charge), coordinate status with webhook events to avoid drift. See API groups in [docs](https://docs.dodopayments.com/developer-resources/introduction).
 
 GET /subscriptions/:subscriptionId (auth)
 - Responses:
@@ -158,7 +158,7 @@ POST /creators/withdraw (auth)
   - 404: { message: 'Creator not found or is not a creator.' }
   - 500: { message, error }
 - Dodo notes:
-  - The sample uses a mocked payout creator. In Dodo, Payouts are tracked (List Payouts) and delivered to your bank; use official payout creation/settlement flows and reconcile via webhooks. See Payouts/Webhooks in [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - The sample uses a mocked payout creator. In Dodo, Payouts are tracked (List Payouts) and delivered to your bank; use official payout creation/settlement flows and reconcile via webhooks. See Payouts/Webhooks in [docs](https://docs.dodopayments.com/developer-resources/introduction).
 
 GET /creators/earnings/:creatorId (auth)
 - Responses:
@@ -176,7 +176,7 @@ PUT /creators/kyc (auth)
   - 404: { message: 'Creator not found or is not a creator.' }
   - 500: { message, error }
 - Dodo notes:
-  - Do not store sensitive bank/KYC data in plaintext. If Dodo offers tokenization/hosted updates (Customer Portal Sessions), prefer those and keep secrets server-side only. See Customers/Portal in [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - Do not store sensitive bank/KYC data in plaintext. If Dodo offers tokenization/hosted updates (Customer Portal Sessions), prefer those and keep secrets server-side only. See Customers/Portal in [docs](https://docs.dodopayments.com/developer-resources/introduction).
 
 GET /creators/ (auth)
 - Responses:
@@ -198,7 +198,7 @@ POST /payments/confirm (auth)
   - 404: { message: 'Transaction not found.' }
   - 500: { message, error }
 - Dodo notes:
-  - Treat this endpoint as advisory. The authoritative source is the webhook; use Payments APIs to fetch details/invoices/line items for reconciliation as needed. See Payments in [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - Treat this endpoint as advisory. The authoritative source is the webhook; use Payments APIs to fetch details/invoices/line items for reconciliation as needed. See Payments in [docs](https://docs.dodopayments.com/developer-resources/introduction).
 
 ## Transactions
 
@@ -219,7 +219,7 @@ POST /webhooks/dodo
   - 200: 'Webhook Received'
   - 500: { message, error }
 - Dodo notes:
-  - Verify signatures using your Webhook Signing Key and reject unverified requests. Manage endpoints, headers, and signing key via Webhooks APIs. See Webhooks in [docs](https://docs.dodopayments.com/api-reference/introduction).
+  - Verify signatures using your Webhook Signing Key and reject unverified requests. Manage endpoints, headers, and signing key via Webhooks APIs. See Webhooks in [docs](https://docs.dodopayments.com/developer-resources/introduction).
 
 Security Note: This is a placeholder handler; add signature verification using Dodo Webhook Signing Key.
 
@@ -243,7 +243,7 @@ Associations:
   - payouts.create({ amount, currency, destination, creatorId }) -> { id, status }
 - Replace with real SDK calls and use environment variables:
   - DODO_API_KEY, DODO_BASE_URL, DODO_RETURN_URL, DODO_CANCEL_URL
-- Dodo quick facts (from [docs](https://docs.dodopayments.com/api-reference/introduction)):
+- Dodo quick facts (from [docs](https://docs.dodopayments.com/developer-resources/introduction)):
   - Environments: Test `https://test.dodopayments.com`, Live `https://live.dodopayments.com`
   - Auth header: `Authorization: Bearer <api_key>` (server-side only)
   - Rate limits: 100/min per key; burst 10/sec; webhooks 1000/min
@@ -260,6 +260,11 @@ Associations:
 
 - Errors return { message, error } with appropriate HTTP status.
 - Respect Dodo rate limits if calling real API.
+
+## Developer Tools
+- Webhook signature verification middleware: `middleware/dodoSignature.js` (enable via `DODO_SIGNATURE_VERIFY=true`)
+- HTTP examples: `docs/requests.http`
+- Onboarding guide: `DEVELOPER_ONBOARDING.md`
 
 ## Notes / TODOs
 
