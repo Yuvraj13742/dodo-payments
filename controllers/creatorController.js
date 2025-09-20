@@ -5,6 +5,20 @@ const { Sequelize } = require('sequelize');
 const MIN_PAYOUT_AMOUNT = 1000;
 const APP_COMMISSION_RATE = 0.25; // 25% commission
 
+/**
+ * POST /creators/withdraw
+ *
+ * Initiates a payout for a creator.
+ * Input (body): { creatorId, amount, bankDetails }
+ * Flow:
+ * - Validate creator role, min payout, sufficient wallet balance
+ * - Create payout via Dodo (mocked here); capture payout id
+ * - Deduct wallet and create pending 'payout' Transaction (status updated by webhook)
+ * - Return { payoutId, processedAmount }
+ * Dodo notes:
+ * - Use Payouts + Webhooks to track settlement; do not store raw bank details in plaintext
+ * - Verify webhook signatures and reconcile payout.succeeded/failed
+ */
 exports.requestPayout = async (req, res) => {
   const { creatorId, amount, bankDetails } = req.body; // bankDetails would be an object with bank_account_number, ifsc_code, etc.
 
@@ -71,6 +85,10 @@ exports.requestPayout = async (req, res) => {
   }
 };
 
+/**
+ * GET /creators/earnings/:creatorId
+ * Summarizes wallet, total earnings (gift_receive + subscription), total payouts, availableForPayout.
+ */
 exports.getEarningsDashboard = async (req, res) => {
   const { creatorId } = req.params;
 
@@ -111,6 +129,12 @@ exports.getEarningsDashboard = async (req, res) => {
   }
 };
 
+/**
+ * PUT /creators/kyc
+ * Updates creator KYC status and bankDetails.
+ * Guidance:
+ * - Prefer tokenization/hosted flows where possible. Restrict access to sensitive data.
+ */
 exports.updateKYCStatus = async (req, res) => {
   const { creatorId, kycStatus, bankDetails } = req.body;
 
@@ -133,6 +157,10 @@ exports.updateKYCStatus = async (req, res) => {
   }
 };
 
+/**
+ * GET /creators/
+ * Lists creators.
+ */
 exports.getAllCreators = async (req, res) => {
   try {
     const creators = await User.findAll({ where: { role: 'creator' }, attributes: ['id', 'username', 'email'] });

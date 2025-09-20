@@ -1,5 +1,17 @@
 const { Transaction, User, Subscription, CoinPackage, sequelize } = require('../models');
 
+/**
+ * POST /payments/confirm
+ *
+ * Advisory endpoint to reflect client-returned payment status.
+ * Input (body): { transactionId, dodoTransactionId, status: 'completed'|'failed'|'cancelled' }
+ * Behavior:
+ * - Validates transaction, updates status in a transaction
+ * - On 'completed' coin_purchase, credits wallet (placeholder conversion)
+ * Guidance:
+ * - Source of truth is /webhooks/dodo with Dodo-signed events. Prefer reconciling via webhooks
+ *   and/or fetching payment details from Dodo if needed.
+ */
 exports.confirmPayment = async (req, res) => {
     const { transactionId, dodoTransactionId, status } = req.body;
 
