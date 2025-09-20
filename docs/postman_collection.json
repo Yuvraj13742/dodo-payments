@@ -1,0 +1,521 @@
+{
+    "info": {
+        "name": "Payment Backend API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "e2e2f2f0-0000-4000-8000-000000000001"
+    },
+    "item": [
+        {
+            "name": "Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        ""
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Auth - Register",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"username\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"user\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/auth/register",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "register"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Auth - Login",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"pass123\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/auth/login",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "auth",
+                        "login"
+                    ]
+                },
+                "event": [
+                    {
+                        "listen": "test",
+                        "script": {
+                            "exec": [
+                                "const json = pm.response.json();",
+                                "if (json && json.token) { pm.collectionVariables.set('token', json.token); }"
+                            ],
+                            "type": "text/javascript"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Coins - Packages",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/coins/packages",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "coins",
+                        "packages"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Coins - Purchase (auth)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"coinPackageId\": 1,\n  \"userId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/coins/purchase",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "coins",
+                        "purchase"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Coins - Balance (auth)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/coins/balance/{{userId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "coins",
+                        "balance",
+                        "{{userId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Payments - Confirm (auth)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"transactionId\": 1,\n  \"dodoTransactionId\": \"cs_123\",\n  \"status\": \"completed\"\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/payments/confirm",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "payments",
+                        "confirm"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Subscriptions - Create (auth)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"creatorId\": 2,\n  \"subscriberId\": 1,\n  \"planType\": \"monthly\",\n  \"price\": 199\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/subscriptions/create",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "subscriptions",
+                        "create"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Subscriptions - Cancel (auth)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"subscriptionId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/subscriptions/cancel",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "subscriptions",
+                        "cancel"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Subscriptions - Get (auth)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/subscriptions/{{subscriptionId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "subscriptions",
+                        "{{subscriptionId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Subscriptions - Plans (auth)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/subscriptions/plans",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "subscriptions",
+                        "plans"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Subscriptions - Update (auth)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"subscriptionId\": 1,\n  \"planType\": \"yearly\",\n  \"price\": 999,\n  \"autoRenew\": true\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/subscriptions/update",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "subscriptions",
+                        "update"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Creator - Withdraw (auth)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"creatorId\": 2,\n  \"amount\": 1500,\n  \"bankDetails\": {\n    \"account\": \"000111222333\",\n    \"ifsc\": \"HDFC0000000\"\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/creators/withdraw",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "creators",
+                        "withdraw"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Creator - Earnings (auth)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/creators/earnings/{{creatorId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "creators",
+                        "earnings",
+                        "{{creatorId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Creator - KYC (auth)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"creatorId\": 2,\n  \"kycStatus\": \"verified\",\n  \"bankDetails\": {\n    \"account\": \"000111222333\",\n    \"ifsc\": \"HDFC0000000\"\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/creators/kyc",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "creators",
+                        "kyc"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Transactions - List (auth)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-auth-token",
+                        "value": "{{token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{baseUrl}}/transactions/{{userId}}",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "transactions",
+                        "{{userId}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Webhook - Simulate (no signature)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"type\": \"payment.succeeded\",\n  \"data\": {\n    \"id\": \"cs_123\",\n    \"amount\": 199,\n    \"currency\": \"INR\",\n    \"metadata\": {\n      \"userId\": 1,\n      \"transactionType\": \"coin_purchase\",\n      \"relatedEntityId\": 1\n    }\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhooks/dodo",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhooks",
+                        "dodo"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Webhook - Simulate (signed)",
+            "event": [
+                {
+                    "listen": "prerequest",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "const secret = pm.environment.get('DODO_WEBHOOK_SECRET') || pm.collectionVariables.get('DODO_WEBHOOK_SECRET');",
+                            "if (!secret) { console.warn('DODO_WEBHOOK_SECRET not set in env or collection variables'); }",
+                            "const body = pm.request.body && pm.request.body.raw ? pm.request.body.raw : '';",
+                            "const signature = CryptoJS.HmacSHA256(body, secret).toString(CryptoJS.enc.Hex);",
+                            "pm.request.headers.upsert({ key: 'x-dodo-signature', value: signature });"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"type\": \"payment.succeeded\",\n  \"data\": {\n    \"id\": \"cs_123\",\n    \"amount\": 199,\n    \"currency\": \"INR\",\n    \"metadata\": {\n      \"userId\": 1,\n      \"transactionType\": \"coin_purchase\",\n      \"relatedEntityId\": 1\n    }\n  }\n}"
+                },
+                "url": {
+                    "raw": "{{baseUrl}}/webhooks/dodo",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "webhooks",
+                        "dodo"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000"
+        },
+        {
+            "key": "token",
+            "value": ""
+        },
+        {
+            "key": "userId",
+            "value": "1"
+        },
+        {
+            "key": "creatorId",
+            "value": "2"
+        },
+        {
+            "key": "subscriptionId",
+            "value": "1"
+        },
+        {
+            "key": "DODO_WEBHOOK_SECRET",
+            "value": ""
+        }
+    ]
+}
