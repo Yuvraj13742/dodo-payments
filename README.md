@@ -271,3 +271,90 @@ Associations:
 - Implement real Dodo SDK client and webhook signature verification.
 - Finalize coin credit calculation on payment confirmation using `CoinPackage` linkage.
 - Implement subscription post-payment linkage and lifecycle updates in payment controller.
+
+## Test vs Live Switch-over
+
+Follow these steps when moving from Test to Live:
+- Set environment:
+  - Use Live base URL `https://live.dodopayments.com` and Live API key.
+  - Rotate keys and restrict access; never commit keys.
+- Update webhook endpoint in Dodo dashboard to your production URL and redeploy with `DODO_SIGNATURE_VERIFY=true` and `DODO_WEBHOOK_SECRET`.
+- Verify webhook signature enforcement in prod; reject unsigned/invalid requests.
+- Update return/cancel URLs to production domains.
+- Disable dev shortcuts: set `SKIP_AUTH=false`, remove password bypass in login.
+- Use production database; run proper migrations (avoid `sequelize.sync({ alter: true })` in prod).
+- Increase observability (structured logs, request IDs, alerts on webhook failures).
+- Validate supported payment methods/countries per your market (see below).
+
+References: environments, integration steps [docs](https://docs.dodopayments.com/developer-resources/introduction), API fundamentals [docs](https://docs.dodopayments.com/api-reference/introduction)
+
+## Supported Countries
+
+Before onboarding users or enabling methods, confirm availability:
+- Query the Supported Countries endpoint and cache results server-side.
+- Gate features and show UX accordingly per country/currency.
+
+Reference: Supported Countries under API Reference — Miscellaneous [docs](https://docs.dodopayments.com/api-reference/introduction)
+
+## How to Review a Dodo Webhook
+
+Use this checklist to safely process events:
+1) Verify signature
+- Ensure `DODO_SIGNATURE_VERIFY=true` and `DODO_WEBHOOK_SECRET` configured.
+- Compute HMAC-SHA256 over the raw JSON and compare to header `x-dodo-signature`.
+
+2) Parse event and enforce idempotency
+- Use the event’s payment/subscription ID to locate your local transaction.
+- Skip if already processed; log unknown IDs for manual review.
+
+3) Apply domain changes atomically
+- For `payment.succeeded`: mark transaction `completed`, then side-effects:
+  - `coin_purchase`: add coins from `CoinPackage`.
+  - `subscription`: mark `Subscription` active and set `endDate` per plan.
+- For `payment.failed`/`payment.cancelled`: set pending transaction accordingly.
+
+4) Respond with 2xx on success; 5xx on internal errors so Dodo retries.
+
+Sample payloads
+
+payment.succeeded
+```
+{
+  "type": "payment.succeeded",
+  "data": {
+    "id": "cs_123456789",
+    "amount": 2999,
+    "currency": "INR",
+    "metadata": {
+      "userId": 1,
+      "transactionType": "coin_purchase",
+      "relatedEntityId": 3
+    }
+  }
+}
+```
+
+payment.failed
+```
+{
+  "type": "payment.failed",
+  "data": {
+    "id": "cs_123456789",
+    "amount": 2999,
+    "currency": "INR",
+    "metadata": {
+      "userId": 1,
+      "transactionType": "subscription",
+      "relatedEntityId": 10
+    }
+  }
+}
+```
+
+Headers
+```
+Content-Type: application/json
+x-dodo-signature: <hex hmac of raw body>
+```
+
+References: Webhooks and developer intro [docs](https://docs.dodopayments.com/developer-resources/introduction), API intro [docs](https://docs.dodopayments.com/api-reference/introduction)
